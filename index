@@ -11,385 +11,456 @@
 <style>
 /* [1] :: Base & Typography */
 :root {
---color-bg-deep: #0d0d0d;
---color-bg-charcoal: #1a1a1a;
---color-text-platinum: #f8f9fa;
---color-text-muted: #a0a0a0;
---color-accent-blue: #00d9ff;
---color-accent-violet: #8b5cf6;
---color-accent-green: #10b981;
+    --color-bg-deep: #0d0d0d;
+    --color-bg-charcoal: #1a1a1a;
+    --color-text-platinum: #f8f9fa;
+    --color-text-muted: #a0a0a0;
+    --color-accent-blue: #00d9ff;
+    --color-accent-violet: #8b5cf6;
+    --color-accent-green: #10b981;
 }
 
 body {
-background-color: var(--color-bg-deep);
-color: var(--color-text-platinum);
-font-family: 'Inter', sans-serif;
-cursor: none;
+    background-color: var(--color-bg-deep);
+    color: var(--color-text-platinum);
+    font-family: 'Inter', sans-serif;
+    cursor: none; /* Custom cursor logic */
+    overflow-x: hidden;
 }
 
 h1, h2, h3 {
-font-family: 'Inter', sans-serif;
-font-weight: 900;
-letter-spacing: -0.05em;
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    letter-spacing: -0.05em;
 }
 
 /* [2] :: Custom Scrollbar */
-::-webkit-scrollbar {
-width: 8px;
-}
-::-webkit-scrollbar-track {
-background: var(--color-bg-deep);
-}
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--color-bg-deep); }
 ::-webkit-scrollbar-thumb {
-background: var(--color-bg-charcoal);
-border-radius: 4px;
-border: 1px solid var(--color-bg-deep);
+    background: var(--color-bg-charcoal);
+    border-radius: 4px;
+    border: 1px solid var(--color-bg-deep);
 }
-::-webkit-scrollbar-thumb:hover {
-background: var(--color-accent-violet);
-}
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent-violet); }
 
-/* [3] :: Custom Cursor */
+/* [3] :: Custom Cursor & Spotlight Architecture */
 .cursor-dot, .cursor-outline {
-pointer-events: none;
-position: fixed;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-border-radius: 50%;
-z-index: 9999;
-mix-blend-mode: difference;
+    pointer-events: none; position: fixed; top: 0; left: 0;
+    border-radius: 50%; z-index: 9999;
+    mix-blend-mode: difference;
+    transform: translate(-50%, -50%);
 }
-.cursor-dot {
-width: 8px;
-height: 8px;
-background-color: var(--color-text-platinum);
-}
+.cursor-dot { width: 8px; height: 8px; background-color: var(--color-text-platinum); }
 .cursor-outline {
-width: 40px;
-height: 40px;
-border: 2px solid var(--color-text-platinum);
-transition: transform 0.2s ease-out, width 0.3s ease-out, height 0.3s ease-out;
+    width: 40px; height: 40px; border: 2px solid var(--color-text-platinum);
+    transition: width 0.3s ease-out, height 0.3s ease-out, opacity 0.3s ease;
 }
 .cursor-outline.hover {
-transform: translate(-50%, -50%) scale(1.5);
-border-color: var(--color-accent-blue);
+    transform: translate(-50%, -50%) scale(1.5);
+    border-color: var(--color-accent-blue);
+}
+
+/* [PERFORMANCE FIX] :: Hardware Accelerated Spotlight */
+.spotlight {
+    pointer-events: none;
+    position: fixed;
+    width: 800px; /* Fixed dimensions */
+    height: 800px;
+    top: 0; left: 0;
+    margin-left: -400px; /* Center anchor */
+    margin-top: -400px;
+    z-index: 1;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, transparent 70%);
+    opacity: 0; /* Hidden initially */
+    transition: opacity 0.5s ease;
+    will-change: transform; /* Hint to browser for optimization */
 }
 
 /* [4] :: Animations & Effects */
 .glow-cta {
-transition: all 0.3s ease;
-box-shadow: 0 0 5px var(--color-accent-blue), 0 0 10px var(--color-accent-blue);
+    transition: all 0.3s ease;
+    box-shadow: 0 0 5px var(--color-accent-blue), 0 0 10px var(--color-accent-blue);
+    touch-action: manipulation;
 }
 .glow-cta:hover {
-box-shadow: 0 0 15px var(--color-accent-blue), 0 0 30px var(--color-accent-blue);
-transform: scale(1.05);
+    box-shadow: 0 0 15px var(--color-accent-blue), 0 0 30px var(--color-accent-blue);
+    transform: scale(1.05);
+}
+
+a, button {
+    touch-action: manipulation;
+    cursor: pointer;
 }
 
 .section-fade-in {
-opacity: 0;
-transform: translateY(20px);
-transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
-.section-fade-in.is-visible {
-opacity: 1;
-transform: translateY(0);
-}
+.section-fade-in.is-visible { opacity: 1; transform: translateY(0); }
 
-.gallery-item-overlay {
-background: linear-gradient(to top, rgba(13, 13, 13, 0.95), rgba(13, 13, 13, 0));
-}
-
-/* [5] :: Gallery Card Fix */
+/* [5] :: Gallery Card */
 .gallery-card {
-min-height: 400px;
-aspect-ratio: 4/5;
+    position: relative;
+    aspect-ratio: 4/5;
+    background-color: var(--color-bg-charcoal);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    z-index: 10;
 }
-.gallery-card-text {
-overflow: hidden;
+
+.gallery-card img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.5s ease;
 }
-.gallery-card-text p {
-display: -webkit-box;
--webkit-line-clamp: 2;
--webkit-box-orient: vertical;
-overflow: hidden;
+
+.gallery-card:hover img {
+    transform: scale(1.1);
+}
+
+.gallery-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(13, 13, 13, 0.95) 0%, rgba(13, 13, 13, 0.1) 50%, transparent 100%);
+    opacity: 0; transition: opacity 0.3s ease;
+}
+.gallery-card:hover .gallery-overlay { opacity: 1; }
+
+.gallery-content {
+    position: absolute; bottom: 0; left: 0; width: 100%;
+    padding: 1.5rem;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.gallery-card:hover .gallery-content {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.gallery-content h3 { color: white; margin-bottom: 0.5rem; font-size: 1.5rem; }
+.gallery-content p { color: var(--color-text-muted); font-size: 0.875rem; line-height: 1.4; }
+
+@media (hover: none) {
+    .gallery-overlay { opacity: 1; }
+    .gallery-content { opacity: 1; transform: translateY(0); }
 }
 
 /* [6] :: Form Styling */
-.floating-label-group {
-position: relative;
-}
+.floating-label-group { position: relative; }
 .floating-input {
-border: 1px solid rgba(248, 249, 250, 0.2);
-background-color: transparent;
-color: var(--color-text-platinum);
-padding: 1rem;
-border-radius: 0.5rem;
-width: 100%;
-outline: none;
-transition: border-color 0.3s ease, box-shadow 0.3s ease;
-box-shadow: 0 0 5px rgba(248, 249, 250, 0.05);
+    border: 1px solid rgba(248, 249, 250, 0.2); background-color: transparent;
+    color: var(--color-text-platinum); padding: 1rem; border-radius: 0.5rem;
+    width: 100%; outline: none; transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 0 5px rgba(248, 249, 250, 0.05);
 }
 .floating-input:focus {
-border-color: rgba(248, 249, 250, 0.6);
-box-shadow: 0 0 10px rgba(248, 249, 250, 0.2);
+    border-color: rgba(248, 249, 250, 0.6); box-shadow: 0 0 10px rgba(248, 249, 250, 0.2);
 }
 .floating-label {
-position: absolute;
-top: 1rem;
-left: 1rem;
-color: var(--color-text-muted);
-pointer-events: none;
-transition: all 0.2s ease-out;
+    position: absolute; top: 1rem; left: 1rem; color: var(--color-text-muted);
+    pointer-events: none; transition: all 0.2s ease-out;
 }
 .floating-input:focus ~ .floating-label,
 .floating-input:not(:placeholder-shown) ~ .floating-label {
-top: -0.65rem;
-left: 0.75rem;
-font-size: 0.75rem;
-color: var(--color-accent-violet);
-background-color: var(--color-bg-deep);
-padding: 0 0.25rem;
+    top: -0.65rem; left: 0.75rem; font-size: 0.75rem;
+    color: var(--color-accent-violet); background-color: var(--color-bg-deep); padding: 0 0.25rem;
 }
 </style>
 </head>
 <body class="overflow-x-hidden">
 
-<!-- Custom Cursor Elements -->
+<!-- Optimized Spotlight Layer -->
+<div class="spotlight"></div>
+
 <div class="cursor-dot"></div>
 <div class="cursor-outline"></div>
 
-<!-- Header & Navigation -->
 <header class="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-md">
-<nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-<a href="#" class="text-2xl font-black tracking-tighter">OBSIDIAN</a>
-<div class="hidden md:flex space-x-8 items-center text-sm uppercase tracking-widest">
-<a href="#about" class="hover:text-violet-400 transition-colors duration-300">Story</a>
-<a href="#gallery" class="hover:text-violet-400 transition-colors duration-300">Work</a>
-<a href="#contact" class="hover:text-violet-400 transition-colors duration-300">Contact</a>
-</div>
-<button id="mobileMenuBtn" class="md:hidden text-white">
-<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-</svg>
-</button>
-</nav>
-<div id="mobileMenu" class="hidden md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-md px-6 py-4 space-y-4 text-sm uppercase tracking-widest">
-<a href="#about" class="block hover:text-violet-400 transition-colors duration-300">Story</a>
-<a href="#gallery" class="block hover:text-violet-400 transition-colors duration-300">Work</a>
-<a href="#contact" class="block hover:text-violet-400 transition-colors duration-300">Contact</a>
-</div>
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="#" class="text-2xl font-black tracking-tighter">OBSIDIAN</a>
+        <div class="hidden md:flex space-x-8 items-center text-sm uppercase tracking-widest">
+            <a href="#about" class="hover:text-[#8b5cf6] transition-colors duration-300">Story</a>
+            <a href="#gallery" class="hover:text-[#8b5cf6] transition-colors duration-300">Work</a>
+            <a href="#contact" class="hover:text-[#8b5cf6] transition-colors duration-300">Contact</a>
+        </div>
+        <button id="mobileMenuBtn" class="md:hidden text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
+    </nav>
+    <div id="mobileMenu" class="hidden md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-md px-6 py-4 space-y-4 text-sm uppercase tracking-widest">
+        <a href="#about" class="block hover:text-[#8b5cf6] transition-colors duration-300">Story</a>
+        <a href="#gallery" class="block hover:text-[#8b5cf6] transition-colors duration-300">Work</a>
+        <a href="#contact" class="block hover:text-[#8b5cf6] transition-colors duration-300">Contact</a>
+    </div>
 </header>
 
 <main>
-<!-- Hero Section -->
-<section id="hero" class="h-screen w-screen flex items-center justify-center relative overflow-hidden">
-<div class="absolute inset-0 bg-gradient-to-br from-black via-transparent to-black opacity-50 z-10"></div>
-<div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
-<div class="text-center z-20 px-4">
-<h1 class="text-6xl md:text-9xl font-black text-white drop-shadow-2xl">CRAFTED.</h1>
-<p class="mt-4 text-lg md:text-2xl text-slate-400 max-w-2xl mx-auto">Websites that sell. Brands that stick. Results you can measure.</p>
-<a href="#about" class="inline-block mt-12 px-10 py-4 text-lg font-bold text-black bg-cyan-300 rounded-full glow-cta">
-See How We Do It
-</a>
-</div>
-</section>
+    <!-- Hero Section -->
+    <section id="hero" class="h-screen w-screen flex items-center justify-center relative overflow-hidden z-20">
+        <div class="absolute inset-0 bg-gradient-to-br from-black via-transparent to-black opacity-50 z-10 pointer-events-none"></div>
+        <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] pointer-events-none"></div>
+        <div class="text-center z-20 px-4">
+            <h1 class="text-5xl sm:text-6xl md:text-9xl font-black text-white drop-shadow-2xl">CRAFTED.</h1>
+            <p class="mt-4 text-lg md:text-2xl text-slate-400 max-w-2xl mx-auto">Websites that sell. Brands that stick. Results you can measure.</p>
+            <a href="#about" class="inline-block mt-12 px-10 py-4 text-lg font-bold text-black bg-[#00d9ff] rounded-full glow-cta">
+                See How We Do It
+            </a>
+        </div>
+    </section>
 
-<!-- About/Story Section -->
-<section id="about" class="py-20 md:py-32 container mx-auto px-6">
-<div class="section-fade-in">
-<h2 class="text-4xl md:text-6xl font-black text-center">How We Work.</h2>
-<p class="mt-6 text-center max-w-3xl mx-auto text-slate-400 text-lg">
-Most agencies give you a pretty website that loads slow and converts nobody. We build sites that load in under 2 seconds, rank on Google, and turn visitors into buyers. Every pixel has a job. Every line of code earns its place.
-</p>
-</div>
-<div class="mt-20 md:mt-32 grid grid-cols-1 md:grid-cols-2 gap-16 items-center section-fade-in">
-<div class="relative">
-<img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop" alt="Minimalist dark architecture with a violet light accent" class="rounded-lg shadow-2xl w-full z-10 relative">
-<div class="absolute -bottom-8 -left-8 w-48 h-48 bg-violet-500/10 rounded-full blur-2xl"></div>
-</div>
-<div class="md:pl-10">
-<h3 class="text-3xl font-bold">Speed + Standards</h3>
-<p class="mt-4 text-slate-400">
-We obsess over load times, accessibility scores, and scalable architecture. But we also know ugly doesn't convert. So you get both: sites that pass every technical audit and make people stop scrolling.
-</p>
-<h3 class="text-3xl font-bold mt-8">Built to Stand Out</h3>
-<p class="mt-4 text-slate-400">
-Cookie-cutter templates kill conversions. We use asymmetry, whitespace, and intentional tension to guide eyes exactly where they need to go. Your message lands. Your offer closes.
-</p>
-</div>
-</div>
-</section>
+    <!-- About/Story Section -->
+    <section id="about" class="py-20 md:py-32 container mx-auto px-6 relative z-20">
+        <div class="section-fade-in">
+            <h2 class="text-4xl md:text-6xl font-black text-center">How We Work.</h2>
+            <p class="mt-6 text-center max-w-3xl mx-auto text-slate-400 text-lg">
+                Most agencies give you a pretty website that loads slow and converts nobody. We build sites that load in under 2 seconds, rank on Google, and turn visitors into buyers. Every pixel has a job. Every line of code earns its place.
+            </p>
+        </div>
+        <div class="mt-20 md:mt-32 grid grid-cols-1 md:grid-cols-2 gap-16 items-center section-fade-in">
+            <div class="relative">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop" alt="Minimalist dark architecture with a violet light accent" class="rounded-lg shadow-2xl w-full z-10 relative">
+                <div class="absolute -bottom-8 -left-8 w-48 h-48 bg-[#8b5cf6]/10 rounded-full blur-2xl"></div>
+            </div>
+            <div class="md:pl-10">
+                <h3 class="text-3xl font-bold">Speed + Standards</h3>
+                <p class="mt-4 text-slate-400">
+                    We obsess over load times, accessibility scores, and scalable architecture. But we also know ugly doesn't convert. So you get both: sites that pass every technical audit and make people stop scrolling.
+                </p>
+                <h3 class="text-3xl font-bold mt-8">Built to Stand Out</h3>
+                <p class="mt-4 text-slate-400">
+                    Cookie-cutter templates kill conversions. We use asymmetry, whitespace, and intentional tension to guide eyes exactly where they need to go. Your message lands. Your offer closes.
+                </p>
+            </div>
+        </div>
+    </section>
 
-<!-- Gallery/Portfolio Section -->
-<section id="gallery" class="py-20 md:py-32 bg-black">
-<div class="container mx-auto px-6">
-<div class="section-fade-in">
-<h2 class="text-4xl md:text-6xl font-black text-center">Recent Wins.</h2>
-<p class="mt-6 text-center max-w-3xl mx-auto text-slate-400 text-lg">
-Real projects. Real results. Here's what we've shipped.
-</p>
-</div>
-<div class="mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-<!-- Gallery Item 1 -->
-<div class="gallery-card group relative overflow-hidden rounded-lg shadow-lg section-fade-in">
-<img src="https://placehold.co/600x750/1a1a1a/8b5cf6?text=AETHER" alt="Project Aether" class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110">
-<div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-<div class="absolute inset-0 flex flex-col justify-end p-6 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
-<div class="gallery-item-overlay absolute inset-0"></div>
-<div class="relative z-10 gallery-card-text">
-<h3 class="text-2xl font-bold text-white">Project Aether</h3>
-<p class="text-slate-400 mt-2 text-sm">Luxury tech e-commerce. 47% lift in conversions.</p>
-</div>
-</div>
-</div>
-<!-- Gallery Item 2 -->
-<div class="gallery-card group relative overflow-hidden rounded-lg shadow-lg section-fade-in" style="transition-delay: 100ms;">
-<img src="https://placehold.co/600x750/1a1a1a/00d9ff?text=NOVA" alt="Project Nova" class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110">
-<div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-<div class="absolute inset-0 flex flex-col justify-end p-6 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
-<div class="gallery-item-overlay absolute inset-0"></div>
-<div class="relative z-10 gallery-card-text">
-<h3 class="text-2xl font-bold text-white">Project Nova</h3>
-<p class="text-slate-400 mt-2 text-sm">Generative artist portfolio. 3x inbound inquiries.</p>
-</div>
-</div>
-</div>
-<!-- Gallery Item 3 -->
-<div class="gallery-card group relative overflow-hidden rounded-lg shadow-lg section-fade-in" style="transition-delay: 200ms;">
-<img src="https://placehold.co/600x750/1a1a1a/10b981?text=CYGNUS" alt="Project Cygnus" class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110">
-<div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-<div class="absolute inset-0 flex flex-col justify-end p-6 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
-<div class="gallery-item-overlay absolute inset-0"></div>
-<div class="relative z-10 gallery-card-text">
-<h3 class="text-2xl font-bold text-white">Project Cygnus</h3>
-<p class="text-slate-400 mt-2 text-sm">DeFi brand + site. $2.4M raised in 60 days.</p>
-</div>
-</div>
-</div>
-</div>
-</div>
-</section>
+    <!-- Gallery/Portfolio Section -->
+    <section id="gallery" class="py-20 md:py-32 bg-black relative z-20">
+        <div class="container mx-auto px-6">
+            <div class="section-fade-in">
+                <h2 class="text-4xl md:text-6xl font-black text-center">Recent Wins.</h2>
+                <p class="mt-6 text-center max-w-3xl mx-auto text-slate-400 text-lg">
+                    Real projects. Real results. Here's what we've shipped.
+                </p>
+            </div>
+            <div class="mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Gallery Item 1 -->
+                <div class="gallery-card group section-fade-in">
+                    <img src="https://placehold.co/600x750/1a1a1a/8b5cf6?text=AETHER" alt="Project Aether">
+                    <div class="gallery-overlay"></div>
+                    <div class="gallery-content">
+                        <h3 class="font-bold">Project Aether</h3>
+                        <p>Luxury tech e-commerce. 47% lift in conversions.</p>
+                    </div>
+                </div>
+                <!-- Gallery Item 2 -->
+                <div class="gallery-card group section-fade-in" style="transition-delay: 100ms;">
+                    <img src="https://placehold.co/600x750/1a1a1a/00d9ff?text=NOVA" alt="Project Nova">
+                    <div class="gallery-overlay"></div>
+                    <div class="gallery-content">
+                        <h3 class="font-bold">Project Nova</h3>
+                        <p>Generative artist portfolio. 3x inbound inquiries.</p>
+                    </div>
+                </div>
+                <!-- Gallery Item 3 -->
+                <div class="gallery-card group section-fade-in" style="transition-delay: 200ms;">
+                    <img src="https://placehold.co/600x750/1a1a1a/10b981?text=CYGNUS" alt="Project Cygnus">
+                    <div class="gallery-overlay"></div>
+                    <div class="gallery-content">
+                        <h3 class="font-bold">Project Cygnus</h3>
+                        <p>DeFi brand + site. $2.4M raised in 60 days.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<!-- Contact Section -->
-<section id="contact" class="py-20 md:py-32 container mx-auto px-6">
-<div class="section-fade-in">
-<h2 class="text-4xl md:text-6xl font-black text-center">Let's Talk.</h2>
-<p class="mt-6 text-center max-w-3xl mx-auto text-slate-400 text-lg">
-Got a project? Tell us what you're building and we'll tell you if we're the right fit.
-</p>
-</div>
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 md:py-32 container mx-auto px-6 relative z-20">
+        <div class="section-fade-in">
+            <h2 class="text-4xl md:text-6xl font-black text-center">Let's Talk.</h2>
+            <p class="mt-6 text-center max-w-3xl mx-auto text-slate-400 text-lg">
+                Got a project? Tell us what you're building and we'll tell you if we're the right fit.
+            </p>
+        </div>
 
-<div class="mt-20 max-w-2xl mx-auto section-fade-in">
-<form id="contactForm" class="space-y-8">
-<div class="floating-label-group">
-<input type="text" id="name" name="name" class="floating-input" placeholder=" " required>
-<label for="name" class="floating-label">Name</label>
-</div>
-<div class="floating-label-group">
-<input type="email" id="email" name="email" class="floating-input" placeholder=" " required>
-<label for="email" class="floating-label">Email</label>
-</div>
-<div class="floating-label-group">
-<textarea id="message" name="message" rows="5" class="floating-input" placeholder=" " required></textarea>
-<label for="message" class="floating-label">What do you need?</label>
-</div>
-<div class="text-center">
-<button type="submit" class="inline-block px-12 py-4 text-lg font-bold text-black bg-cyan-300 rounded-full glow-cta">
-Send It
-</button>
-</div>
-</form>
-<div id="successMessage" class="hidden mt-8 p-4 text-center text-green-200 bg-green-500/10 border border-green-500/30 rounded-lg">
-<p class="font-bold">Got it.</p>
-<p class="text-sm">We'll be in touch within 24 hours.</p>
-</div>
-</div>
-</section>
+        <div class="mt-20 max-w-2xl mx-auto section-fade-in">
+            <form id="contactForm" method="POST" class="space-y-8">
+                <div class="floating-label-group">
+                    <input type="text" id="name" name="name" class="floating-input" placeholder=" " required>
+                    <label for="name" class="floating-label">Name</label>
+                </div>
+                <div class="floating-label-group">
+                    <input type="email" id="email" name="email" class="floating-input" placeholder=" " required>
+                    <label for="email" class="floating-label">Email</label>
+                </div>
+                <div class="floating-label-group">
+                    <textarea id="message" name="message" rows="5" class="floating-input" placeholder=" " required></textarea>
+                    <label for="message" class="floating-label">What do you need?</label>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="inline-block px-12 py-4 text-lg font-bold text-black bg-[#00d9ff] rounded-full glow-cta">
+                        Send It
+                    </button>
+                </div>
+            </form>
+            <div id="successMessage" class="hidden mt-8 p-4 text-center text-green-200 bg-green-500/10 border border-green-500/30 rounded-lg">
+                <p class="font-bold">Got it.</p>
+                <p class="text-sm">We'll be in touch within 24 hours.</p>
+            </div>
+            <div id="errorMessage" class="hidden mt-8 p-4 text-center text-red-200 bg-red-500/10 border border-red-500/30 rounded-lg">
+                <p class="font-bold">Error.</p>
+                <p class="text-sm">Something went wrong. Please try again later.</p>
+            </div>
+        </div>
+    </section>
 </main>
 
-<!-- Footer -->
 <footer class="py-8 bg-black">
-<div class="container mx-auto px-6 text-center text-slate-500 text-sm">
-<p>© 2025 Obsidian. All Rights Reserved.</p>
-</div>
+    <div class="container mx-auto px-6 text-center text-slate-500 text-sm">
+        <p>© 2025 Obsidian. All Rights Reserved.</p>
+    </div>
 </footer>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // -------------------------------------------------------------------------
+    // [CONFIG] PASTE YOUR FORMSPREE ENDPOINT HERE
+    // Example: "https://formspree.io/f/mqkrz..."
+    const FORM_ENDPOINT = ""; 
+    // -------------------------------------------------------------------------
 
-// [1] :: Custom Cursor Logic
-const cursorDot = document.querySelector('.cursor-dot');
-const cursorOutline = document.querySelector('.cursor-outline');
+    const cursorDot = document.querySelector('.cursor-dot');
+    const cursorOutline = document.querySelector('.cursor-outline');
+    const spotlight = document.querySelector('.spotlight');
 
-window.addEventListener('mousemove', (e) => {
-const posX = e.clientX;
-const posY = e.clientY;
+    // [1] :: High-Performance Loop
+    let mouseX = 0;
+    let mouseY = 0;
 
-cursorDot.style.left = `${posX}px`;
-cursorDot.style.top = `${posY}px`;
+    const updateCoords = (x, y) => {
+        mouseX = x;
+        mouseY = y;
+        if(spotlight && spotlight.style.opacity !== '1') {
+            spotlight.style.opacity = '1';
+        }
+    };
 
-cursorOutline.animate({
-left: `${posX}px`,
-top: `${posY}px`
-}, { duration: 500, fill: 'forwards' });
-});
+    window.addEventListener('mousemove', e => updateCoords(e.clientX, e.clientY));
+    window.addEventListener('touchstart', e => updateCoords(e.touches[0].clientX, e.touches[0].clientY));
+    window.addEventListener('touchmove', e => updateCoords(e.touches[0].clientX, e.touches[0].clientY));
 
-const interactiveElements = document.querySelectorAll('a, button, input, textarea');
-interactiveElements.forEach(el => {
-el.addEventListener('mouseover', () => cursorOutline.classList.add('hover'));
-el.addEventListener('mouseleave', () => cursorOutline.classList.remove('hover'));
-});
+    const animate = () => {
+        if (cursorDot) {
+            cursorDot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+        }
+        if (cursorOutline) {
+             cursorOutline.animate({
+                left: `${mouseX}px`,
+                top: `${mouseY}px`
+            }, { duration: 500, fill: "forwards" });
+        }
+        if (spotlight) {
+            spotlight.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+        }
+        requestAnimationFrame(animate);
+    };
+    animate();
 
-// Disable custom cursor on mobile
-if ('ontouchstart' in window) {
-cursorDot.style.display = 'none';
-cursorOutline.style.display = 'none';
-}
+    const interactiveElements = document.querySelectorAll('a, button, input, textarea');
+    interactiveElements.forEach(el => {
+        el.addEventListener('mouseover', () => cursorOutline?.classList.add('hover'));
+        el.addEventListener('mouseleave', () => cursorOutline?.classList.remove('hover'));
+    });
 
-// [2] :: Intersection Observer for Scroll Animations
-const observer = new IntersectionObserver((entries) => {
-entries.forEach(entry => {
-if (entry.isIntersecting) {
-entry.target.classList.add('is-visible');
-}
-});
-}, {
-threshold: 0.1
-});
+    if ('ontouchstart' in window) {
+        if(cursorDot) cursorDot.style.display = 'none';
+        if(cursorOutline) cursorOutline.style.display = 'none';
+        document.body.style.cursor = 'auto';
+    }
 
-const sections = document.querySelectorAll('.section-fade-in');
-sections.forEach(section => {
-observer.observe(section);
-});
+    // [2] :: Intersection Observer
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+            }
+        });
+    }, { threshold: 0.1 });
+    const sections = document.querySelectorAll('.section-fade-in');
+    sections.forEach(section => { observer.observe(section); });
 
-// [3] :: Contact Form Logic
-const contactForm = document.getElementById('contactForm');
-const successMessage = document.getElementById('successMessage');
+    // [3] :: Professional Form Handling (AJAX)
+    const contactForm = document.getElementById('contactForm');
+    const successMessage = document.getElementById('successMessage');
+    const errorMessage = document.getElementById('errorMessage');
 
-contactForm.addEventListener('submit', (e) => {
-e.preventDefault();
-console.log('Form submitted!');
-contactForm.style.display = 'none';
-successMessage.classList.remove('hidden');
-});
+    if (contactForm) {
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!FORM_ENDPOINT) {
+                console.warn("No Formspree endpoint set. Running in demo mode.");
+                contactForm.style.display = 'none';
+                successMessage.classList.remove('hidden');
+                return;
+            }
+            const formData = new FormData(contactForm);
+            try {
+                const response = await fetch(FORM_ENDPOINT, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (response.ok) {
+                    contactForm.style.display = 'none';
+                    successMessage.classList.remove('hidden');
+                } else {
+                    errorMessage.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorMessage.classList.remove('hidden');
+            }
+        });
+    }
 
-// [4] :: Mobile Menu Toggle
-const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-const mobileMenu = document.getElementById('mobileMenu');
+    // [4] :: Mobile Menu
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+    }
 
-mobileMenuBtn.addEventListener('click', () => {
-mobileMenu.classList.toggle('hidden');
-});
-
-mobileMenu.querySelectorAll('a').forEach(link => {
-link.addEventListener('click', () => {
-mobileMenu.classList.add('hidden');
-});
-});
-
+    // [5] :: PROFESSIONAL SMOOTH SCROLL (FIX FOR TABLET/IFRAME JUMP)
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault(); // Stop the URL hash change (the cause of the flash)
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            
+            if (targetElement) {
+                // Manually drive the scroll engine
+                targetElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+                // Close mobile menu if open
+                if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            }
+        });
+    });
 });
 </script>
-
 </body>
 </html>
